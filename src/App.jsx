@@ -1,34 +1,54 @@
-import { Component } from 'react'
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Component } from 'react';
+import { useState } from 'react';
+import CardList from './components/card-list/card-list.component';
+import SearchBox from './components/search-box/search-box.component';
+import './App.css';
 
 class App extends Component {
+  constructor(){
+    super();
+
+    this.state = {
+      monsters: [],
+      searchField: '', 
+    };
+  }
+
+  componentDidMount(){
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then(response => response.json())
+      .then((users) => this.setState(() => {
+        return {monsters: users};
+      }));
+  }
+
+  onSearchChange = (event) => {
+    const searchField = event.target.value.toLowerCase();
+    
+    this.setState(() => {
+      return { searchField: searchField };
+    })
+  }
+
   render(){
-    const [count, setCount] = useState(0)
+    const { monsters, searchField } = this.state;
+    const { onSearchChange } = this;
+
+    const filteredMonsters = monsters.filter((monster) => {
+      return monster.name.toLowerCase().includes(searchField);
+    });
+
     return (
       <>
-        <div>
-          <a href="https://vite.dev" target="_blank">
-            <img src={viteLogo} className="logo" alt="Vite logo" />
-          </a>
-          <a href="https://react.dev" target="_blank">
-            <img src={reactLogo} className="logo react" alt="React logo" />
-          </a>
+        <div className='App'>
+          <h1 className='app-title'>Monsters Rolodex</h1>
+          <SearchBox
+            className='monsters-search-box'
+            onChangeHandler={onSearchChange}
+            placeholder={'search monsters'}
+          />
+          <CardList monsters={filteredMonsters} />
         </div>
-        <h1>Vite + React</h1>
-        <div className="card">
-          <button onClick={() => setCount((count) => count + 1)}>
-            count is {count}
-          </button>
-          <p>
-            Hello World!
-          </p>
-        </div>
-        <p className="read-the-docs">
-          Click on the Vite and React logos to learn more
-        </p>
       </>
     )
   }
